@@ -21,16 +21,21 @@
             text-align: center;
             margin: 20px 0;
             font-size: 4rem;
-			line-height: 6rem;
+            line-height: 6rem;
         }
         #timer {
             font-size: 9rem;
             font-weight: bold;
-			margin-bottom: 2rem;
+            margin-bottom: 2rem;
         }
         #rest-label {
             font-size: 1.5rem;
             margin-top: 10px;
+        }
+        #up-next {
+            font-size: 2rem;
+            margin-top: 10px;
+            display: none;
         }
         #start-button {
             display: block;
@@ -52,10 +57,11 @@
         <div id="exercise-name">Push-ups</div>
         <div id="set-count">Set 1</div>
         <div id="rest-label" style="display: none;">Resting...</div>
+        <div id="up-next" style="display: none;">Up Next: </div>
     </div>
 
     <script>
-        const DEBUG = true;
+        const DEBUG = false;
         
         const workoutRoutine = [
             { name: 'Dynamic Cross-Body Stretch (Warm-up)', duration: 30, sets: 1 },
@@ -63,10 +69,6 @@
 
             { name: 'Doorway Pec Stretch', duration: 30, sets: 3 },
             { name: 'Rhomboid Stretch', duration: 30, sets: 3 },
-            { name: 'Doorway Pec Stretch', duration: 30, sets: 1 },
-            { name: 'Rhomboid Stretch', duration: 30, sets: 1 },
-            { name: 'Doorway Pec Stretch', duration: 30, sets: 1 },
-            { name: 'Rhomboid Stretch', duration: 30, sets: 1 },
 
             { name: 'Open Book Stretch', duration: 120, sets: 2 },
             { name: 'Thread the Needle', duration: 60, sets: 1 },
@@ -78,7 +80,7 @@
 			
             { name: 'Pushup', duration: 30, sets: 1 },
             { name: 'Curl-ups', duration: 30, sets: 1 },
-			
+
             // { name: 'Push Press', duration: 90, sets: 1 },
             // { name: 'Quadruped Band Horizontal Abduction', duration: 60, sets: 1 },
             // { name: 'Prone T to Y (1 Arm at a Time)', duration: 180, sets: 1 },
@@ -94,6 +96,7 @@
         const setCountElement = document.getElementById('set-count');
         const timerElement = document.getElementById('timer');
         const restLabel = document.getElementById('rest-label');
+        const upNextElement = document.getElementById('up-next');
         const currentExerciseDiv = document.getElementById('current-exercise');
 
         let audioContext;
@@ -126,18 +129,28 @@
         function startTimer(duration, isRest, callback) {
             timeLeft = duration;
             timerElement.textContent = timeLeft;
-
+			
+		    if (timeLeft === 3) {
+		        playCountdownBeeps();
+		    }
+			
+			
             document.body.style.backgroundColor = isRest ? '#ffd6d6' : '#d6ffd6';
             restLabel.style.display = isRest ? 'block' : 'none';
-
+            upNextElement.style.display = isRest && currentExerciseIndex + 1 < workoutRoutine.length ? 'block' : 'none';
+            if (isRest && currentExerciseIndex + 1 < workoutRoutine.length) {
+                upNextElement.textContent = `Up Next: ${workoutRoutine[currentExerciseIndex + 1].name}`;
+            }
+            
             timerInterval = setInterval(() => {
                 timeLeft--;
                 timerElement.textContent = timeLeft;
-
-                if (timeLeft === 3) {
-                    playCountdownBeeps();
-                }
-
+				
+				                if (timeLeft === 3) {
+				                    playCountdownBeeps();
+				                }
+				
+				
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
                     callback();
@@ -149,6 +162,7 @@
             const exercise = workoutRoutine[currentExerciseIndex];
             exerciseNameElement.textContent = exercise.name;
             setCountElement.textContent = `Set ${currentSet} of ${exercise.sets}`;
+            upNextElement.style.display = 'none';
 
             startTimer(exercise.duration, false, () => {
                 startTimer(10, true, () => {
@@ -171,17 +185,18 @@
                 exerciseNameElement.textContent = 'Workout Complete!';
                 timerElement.textContent = '';
                 restLabel.style.display = 'none';
+                upNextElement.style.display = 'none';
                 document.body.style.backgroundColor = '#f4f4f4';
             }
         }
 
         startButton.addEventListener('click', () => {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                startButton.style.display = 'none';
-                currentExerciseDiv.style.display = 'block';
-                updateExercise();
-            }
+			            if (!audioContext) {
+			                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+			                startButton.style.display = 'none';
+			                currentExerciseDiv.style.display = 'block';
+			                updateExercise();
+			            }
         });
     </script>
 </body>

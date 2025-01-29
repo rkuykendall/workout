@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Routine</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            transition: background-color 0.5s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .exercise {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 4rem;
+			line-height: 6rem;
+        }
+        #timer {
+            font-size: 9rem;
+            font-weight: bold;
+			margin-bottom: 2rem;
+        }
+        #rest-label {
+            font-size: 1.5rem;
+            margin-top: 10px;
+        }
+        #start-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 1.5rem;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <button id="start-button">Start Workout</button>
+    <div id="current-exercise" class="exercise" style="display: none;">
+        <div id="timer">30</div>
+        <div id="exercise-name">Push-ups</div>
+        <div id="set-count">Set 1</div>
+        <div id="rest-label" style="display: none;">Resting...</div>
+    </div>
+
+    <script>
+        const DEBUG = true;
+        
+        const workoutRoutine = [
+            { name: 'Dynamic Cross-Body Stretch (Warm-up)', duration: 30, sets: 1 },
+            { name: 'Alt Shoulder IR/ER with Arms Extended (Warm-up)', duration: 30, sets: 1 },
+
+            { name: 'Doorway Pec Stretch', duration: 30, sets: 3 },
+            { name: 'Rhomboid Stretch', duration: 30, sets: 3 },
+            { name: 'Doorway Pec Stretch', duration: 30, sets: 1 },
+            { name: 'Rhomboid Stretch', duration: 30, sets: 1 },
+            { name: 'Doorway Pec Stretch', duration: 30, sets: 1 },
+            { name: 'Rhomboid Stretch', duration: 30, sets: 1 },
+
+            { name: 'Open Book Stretch', duration: 120, sets: 2 },
+            { name: 'Thread the Needle', duration: 60, sets: 1 },
+            { name: 'Plank Walkout (5s Hold)', duration: 45, sets: 3 },
+            { name: 'Cat / Cow', duration: 30, sets: 3 },
+            { name: 'Y Slide + Lift (Blue/Purple Band)', duration: 60, sets: 3 },
+            { name: 'Elbow Side Plank + Snatch', duration: 25, sets: 3 },
+            { name: 'Serratus Pushup', duration: 30, sets: 1 },
+			
+            { name: 'Pushup', duration: 30, sets: 1 },
+            { name: 'Curl-ups', duration: 30, sets: 1 },
+			
+            // { name: 'Push Press', duration: 90, sets: 1 },
+            // { name: 'Quadruped Band Horizontal Abduction', duration: 60, sets: 1 },
+            // { name: 'Prone T to Y (1 Arm at a Time)', duration: 180, sets: 1 },
+        ].map(workout => ({ ...workout, duration: DEBUG ? 10 : workout.duration }));
+
+        let currentExerciseIndex = 0;
+        let currentSet = 1;
+        let timerInterval;
+        let timeLeft;
+
+        const startButton = document.getElementById('start-button');
+        const exerciseNameElement = document.getElementById('exercise-name');
+        const setCountElement = document.getElementById('set-count');
+        const timerElement = document.getElementById('timer');
+        const restLabel = document.getElementById('rest-label');
+        const currentExerciseDiv = document.getElementById('current-exercise');
+
+        let audioContext;
+
+        function playBeep(frequency, startTime, duration) {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.type = "sine";
+            oscillator.frequency.setValueAtTime(frequency, startTime);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.start(startTime);
+            oscillator.stop(startTime + duration);
+        }
+
+        function playCountdownBeeps() {
+            const startTime = audioContext.currentTime;
+            const beepDuration = 0.1;
+
+            for (let i = 0; i < 3; i++) {
+                playBeep(500, startTime + i, beepDuration);
+            }
+
+            const finalBeepStart = startTime + 3;
+            playBeep(720, finalBeepStart, 0.3);
+        }
+
+        function startTimer(duration, isRest, callback) {
+            timeLeft = duration;
+            timerElement.textContent = timeLeft;
+
+            document.body.style.backgroundColor = isRest ? '#ffd6d6' : '#d6ffd6';
+            restLabel.style.display = isRest ? 'block' : 'none';
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = timeLeft;
+
+                if (timeLeft === 3) {
+                    playCountdownBeeps();
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    callback();
+                }
+            }, 1000);
+        }
+
+        function updateExercise() {
+            const exercise = workoutRoutine[currentExerciseIndex];
+            exerciseNameElement.textContent = exercise.name;
+            setCountElement.textContent = `Set ${currentSet} of ${exercise.sets}`;
+
+            startTimer(exercise.duration, false, () => {
+                startTimer(10, true, () => {
+                    if (currentSet < exercise.sets) {
+                        currentSet++;
+                        updateExercise();
+                    } else {
+                        currentSet = 1;
+                        nextExercise();
+                    }
+                });
+            });
+        }
+
+        function nextExercise() {
+            currentExerciseIndex++;
+            if (currentExerciseIndex < workoutRoutine.length) {
+                updateExercise();
+            } else {
+                exerciseNameElement.textContent = 'Workout Complete!';
+                timerElement.textContent = '';
+                restLabel.style.display = 'none';
+                document.body.style.backgroundColor = '#f4f4f4';
+            }
+        }
+
+        startButton.addEventListener('click', () => {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                startButton.style.display = 'none';
+                currentExerciseDiv.style.display = 'block';
+                updateExercise();
+            }
+        });
+    </script>
+</body>
+</html>

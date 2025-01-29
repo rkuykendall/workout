@@ -1,0 +1,58 @@
+:root {
+  --color-sky-50: oklch(0.977 0.013 236.62);
+  --color-sky-300: oklch(0.828 0.111 230.318);
+}
+
+.hidden {
+  opacity: 0;
+}
+
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+#workout-container {
+  height: 100vh;
+  background-color: var(--color-sky-50);
+  transition: background-color 0.5s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#workout-container.resting {
+  background-color: var(--color-sky-300);
+}
+
+.exercise {
+  text-align: center;
+  margin: 20px 0;
+  font-size: 4rem;
+  line-height: 6rem;
+}
+
+#timer {
+  font-size: 9rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+}
+
+#rest-label {
+  font-size: 1.5rem;
+  margin-top: 10px;
+}
+
+#start-button {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  font-size: 1.5rem;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}

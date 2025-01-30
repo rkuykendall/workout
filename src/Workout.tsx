@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import clsx from 'clsx';
 
 const DEBUG = false;
 
@@ -114,12 +115,8 @@ function Workout({ audioContext }: { audioContext: AudioContext }) {
           )}
         </div>
 
-        <div id="set-count">
+        <div id="set-count" className={isRest ? 'hidden' : 'visible'}>
           Set {currentSet} of {workoutRoutine[currentExerciseIndex].sets}
-        </div>
-
-        <div id="rest-label" className={isRest ? 'visible' : 'hidden'}>
-          Resting...
         </div>
       </div>
     </div>

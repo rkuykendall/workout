@@ -8,6 +8,7 @@ function Workout({ audioContext }: { audioContext: AudioContext }) {
   const [timeLeft, setTimeLeft] = useState(workoutRoutine[0].duration);
   const [isRest, setIsRest] = useState(false);
   const [isRestBetweenSets, setIsRestBetweenSets] = useState(false);
+  const [restTime, setRestTime] = useState(REST_TIME);
 
   const startTimer = useCallback(
     (duration: number, rest: boolean, betweenSets: boolean = false) => {
@@ -19,44 +20,48 @@ function Workout({ audioContext }: { audioContext: AudioContext }) {
   );
 
   const nextExercise = useCallback(() => {
-    if (currentExerciseIndex + 1 < workoutRoutine.length) {
-      setCurrentExerciseIndex((prevIndex) => prevIndex + 1);
-      setCurrentSet(1);
-      startTimer(workoutRoutine[currentExerciseIndex + 1].duration, false);
-    } else {
-      setIsStarted(false);
-    }
-  }, [currentExerciseIndex, startTimer]);
+    setCurrentExerciseIndex((prevIndex) => {
+      if (prevIndex + 1 < workoutRoutine.length) {
+        setCurrentSet(1);
+        startTimer(workoutRoutine[prevIndex + 1].duration, false);
+        return prevIndex + 1;
+      } else {
+        setIsStarted(false);
+        return prevIndex;
+      }
+    });
+  }, [startTimer]);
 
   useEffect(() => {
-    if (!isStarted) return;
+    if (!isStarted || timeLeft < 0) return;
 
-    if (timeLeft === 3) {
-      playCountdownBeeps(audioContext);
-    }
+    if (timeLeft === 3) playCountdownBeeps(audioContext);
 
     if (timeLeft === 0) {
-      if (isRest) {
-        if (isRestBetweenSets) {
-          setIsRestBetweenSets(false);
-          startTimer(workoutRoutine[currentExerciseIndex].duration, false);
+      setTimeout(() => {
+        if (isRest) {
+          if (isRestBetweenSets) {
+            setIsRestBetweenSets(false);
+            startTimer(workoutRoutine[currentExerciseIndex].duration, false);
+          } else {
+            nextExercise();
+          }
         } else {
-          nextExercise();
+          if (currentSet < workoutRoutine[currentExerciseIndex].sets) {
+            setCurrentSet((prevSet) => prevSet + 1);
+            setRestTime((prevRest) => prevRest + 1);
+            startTimer(restTime, true, true);
+          } else {
+            startTimer(restTime, true);
+          }
         }
-      } else {
-        if (currentSet < workoutRoutine[currentExerciseIndex].sets) {
-          setCurrentSet((prevSet) => prevSet + 1);
-          startTimer(10, true, true); // Rest between sets
-        } else {
-          startTimer(REST_TIME, true); // Rest between exercises
-        }
-      }
+      }, 100);
     }
 
-    const timer = setInterval(
-      () => setTimeLeft((prevTime) => prevTime - 1),
-      1000
-    );
+    const timer = setInterval(() => {
+      setTimeLeft((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
+    }, 1000);
+
     return () => clearInterval(timer);
   }, [
     timeLeft,
@@ -65,6 +70,7 @@ function Workout({ audioContext }: { audioContext: AudioContext }) {
     isRestBetweenSets,
     currentSet,
     currentExerciseIndex,
+    restTime,
     audioContext,
     nextExercise,
     startTimer,

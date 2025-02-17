@@ -1,5 +1,7 @@
 const DEBUG = false;
 
+export const REST_TIME = DEBUG ? 5 : 15;
+
 interface Workout {
   name: string;
   duration: number;
@@ -31,7 +33,7 @@ export const workoutRoutine: Workout[] = [
   // { name: 'Push Press', duration: 90, sets: 1 },
   // { name: 'Quadruped Band Horizontal Abduction', duration: 60, sets: 1 },
   // { name: 'Prone T to Y (1 Arm at a Time)', duration: 180, sets: 1 },
-].map((workout) => ({ ...workout, duration: DEBUG ? 10 : workout.duration }));
+].map((workout) => ({ ...workout, duration: DEBUG ? 5 : workout.duration }));
 
 export function playBeep(
   audioContext: AudioContext,

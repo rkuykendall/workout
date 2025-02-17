@@ -1,23 +1,44 @@
-import { useState, useEffect } from 'react';
-import { playCountdownBeeps, workoutRoutine } from './utils';
+import { useState, useEffect, useCallback } from 'react';
+import { playCountdownBeeps, REST_TIME, workoutRoutine } from './utils';
 
 function Workout({ audioContext }: { audioContext: AudioContext }) {
-  const [started, setStarted] = useState(true);
+  const [isStarted, setIsStarted] = useState(true);
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [currentSet, setCurrentSet] = useState(1);
   const [timeLeft, setTimeLeft] = useState(workoutRoutine[0].duration);
   const [isRest, setIsRest] = useState(false);
-  const [restBetweenSets, setRestBetweenSets] = useState(false);
+  const [isRestBetweenSets, setIsRestBetweenSets] = useState(false);
+
+  const startTimer = useCallback(
+    (duration: number, rest: boolean, betweenSets: boolean = false) => {
+      setTimeLeft(duration);
+      setIsRest(rest);
+      setIsRestBetweenSets(betweenSets);
+    },
+    []
+  );
+
+  const nextExercise = useCallback(() => {
+    if (currentExerciseIndex + 1 < workoutRoutine.length) {
+      setCurrentExerciseIndex((prevIndex) => prevIndex + 1);
+      setCurrentSet(1);
+      startTimer(workoutRoutine[currentExerciseIndex + 1].duration, false);
+    } else {
+      setIsStarted(false);
+    }
+  }, [currentExerciseIndex, startTimer]);
 
   useEffect(() => {
-    if (!started) return;
+    if (!isStarted) return;
+
     if (timeLeft === 3) {
       playCountdownBeeps(audioContext);
     }
+
     if (timeLeft === 0) {
       if (isRest) {
-        if (restBetweenSets) {
-          setRestBetweenSets(false);
+        if (isRestBetweenSets) {
+          setIsRestBetweenSets(false);
           startTimer(workoutRoutine[currentExerciseIndex].duration, false);
         } else {
           nextExercise();
@@ -27,65 +48,50 @@ function Workout({ audioContext }: { audioContext: AudioContext }) {
           setCurrentSet((prevSet) => prevSet + 1);
           startTimer(10, true, true); // Rest between sets
         } else {
-          startTimer(15, true, false); // Rest between exercises
+          startTimer(REST_TIME, true); // Rest between exercises
         }
       }
     }
 
-    const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
+    const timer = setInterval(
+      () => setTimeLeft((prevTime) => prevTime - 1),
+      1000
+    );
     return () => clearInterval(timer);
-  }, [timeLeft, started]);
+  }, [
+    timeLeft,
+    isStarted,
+    isRest,
+    isRestBetweenSets,
+    currentSet,
+    currentExerciseIndex,
+    audioContext,
+    nextExercise,
+    startTimer,
+  ]);
 
-  function startTimer(
-    duration: number,
-    rest: boolean,
-    betweenSets: boolean = false
-  ) {
-    setTimeLeft(duration);
-    setIsRest(rest);
-    setRestBetweenSets(betweenSets);
-  }
-
-  function nextExercise() {
-    if (currentExerciseIndex + 1 < workoutRoutine.length) {
-      setCurrentExerciseIndex((prevIndex) => prevIndex + 1);
-      setCurrentSet(1);
-      startTimer(workoutRoutine[currentExerciseIndex + 1].duration, false);
-    } else {
-      setStarted(false);
-    }
-  }
-
-  const showUpNext: boolean =
+  const showUpNext =
     isRest &&
-    !restBetweenSets &&
+    !isRestBetweenSets &&
     currentExerciseIndex + 1 < workoutRoutine.length;
+  const currentExercise = workoutRoutine[currentExerciseIndex];
+  const nextExerciseName = workoutRoutine[currentExerciseIndex + 1]?.name;
+  const hasMultipleSets = currentExercise.sets > 1;
 
   return (
     <div id="workout-container" className={isRest ? 'resting' : ''}>
       <div id="current-exercise" className="exercise">
         <div id="timer">{timeLeft}</div>
-
         <div id="exercise-name">
-          {showUpNext ? (
-            <>Up Next: {workoutRoutine[currentExerciseIndex + 1].name}</>
-          ) : (
-            workoutRoutine[currentExerciseIndex].name
-          )}
+          {showUpNext ? `Up Next: ${nextExerciseName}` : currentExercise.name}
         </div>
-
-        <div
-          id="set-count"
-          className={
-            workoutRoutine[currentExerciseIndex].sets === 1
-              ? 'hidden'
-              : 'visible'
-          }
-        >
-          {isRest
-            ? 'Resting...'
-            : `Set ${currentSet} of ${workoutRoutine[currentExerciseIndex].sets}`}
-        </div>
+        {hasMultipleSets && (
+          <div id="set-count" className="visible">
+            {isRest
+              ? 'Resting...'
+              : `Set ${currentSet} of ${currentExercise.sets}`}
+          </div>
+        )}
       </div>
     </div>
   );

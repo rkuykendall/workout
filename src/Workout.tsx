@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
+import clsx from 'clsx';
 import { playCountdownBeeps, REST_TIME, workoutRoutine } from './utils';
 
 function Workout({ audioContext }: { audioContext: AudioContext }) {
   const [isStarted, setIsStarted] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [currentSet, setCurrentSet] = useState(1);
   const [timeLeft, setTimeLeft] = useState(workoutRoutine[0].duration);
@@ -33,7 +35,7 @@ function Workout({ audioContext }: { audioContext: AudioContext }) {
   }, [startTimer]);
 
   useEffect(() => {
-    if (!isStarted || timeLeft < 0) return;
+    if (!isStarted || isPaused || timeLeft < 0) return;
 
     if (timeLeft === 3) playCountdownBeeps(audioContext);
 
@@ -66,6 +68,7 @@ function Workout({ audioContext }: { audioContext: AudioContext }) {
   }, [
     timeLeft,
     isStarted,
+    isPaused,
     isRest,
     isRestBetweenSets,
     currentSet,
@@ -76,16 +79,23 @@ function Workout({ audioContext }: { audioContext: AudioContext }) {
     startTimer,
   ]);
 
-  const showUpNext =
+  const togglePause = () => {
+    setIsPaused((prev) => !prev);
+  };
+
+  const showUpNext: boolean =
     isRest &&
     !isRestBetweenSets &&
     currentExerciseIndex + 1 < workoutRoutine.length;
   const currentExercise = workoutRoutine[currentExerciseIndex];
   const nextExerciseName = workoutRoutine[currentExerciseIndex + 1]?.name;
-  const hasMultipleSets = currentExercise.sets > 1;
+  const hasMultipleSets: boolean = currentExercise.sets > 1;
 
   return (
-    <div id="workout-container" className={isRest ? 'resting' : ''}>
+    <div
+      id="workout-container"
+      className={clsx({ resting: isRest, paused: isPaused })}
+    >
       <div id="current-exercise" className="exercise">
         <div id="timer">{timeLeft}</div>
         <div id="exercise-name">
@@ -99,6 +109,9 @@ function Workout({ audioContext }: { audioContext: AudioContext }) {
           </div>
         )}
       </div>
+      <button onClick={togglePause} className="button">
+        {isPaused ? 'Resume' : 'Pause'}
+      </button>
     </div>
   );
 }

@@ -13,6 +13,7 @@ function App() {
     <div id="workout-container">
       <button
         id="start-button"
+        className="button"
         onClick={() => {
           const audioContext = new window.AudioContext();
           setAudioContext(audioContext);

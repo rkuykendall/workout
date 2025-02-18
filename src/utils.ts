@@ -27,8 +27,8 @@ export const workoutRoutine: Workout[] = [
   { name: 'Elbow Side Plank + Snatch', duration: 25, sets: 6 },
   { name: 'Serratus Pushup', duration: 30, sets: 1 },
 
-  { name: 'Pushup', duration: 20, sets: 1 },
-  { name: 'Curl-ups', duration: 20, sets: 1 },
+  { name: 'Pushup', duration: 15, sets: 2 },
+  { name: 'Curl-ups', duration: 30, sets: 2 },
 
   // { name: 'Push Press', duration: 90, sets: 1 },
   // { name: 'Quadruped Band Horizontal Abduction', duration: 60, sets: 1 },

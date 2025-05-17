@@ -29,6 +29,7 @@ A minimal workout timer I built to guide me through my physical therapy exercise
 ### Development
 
 Run the development server:
+
 ```bash
 npm run dev
 ```
@@ -36,6 +37,7 @@ npm run dev
 ### Build
 
 Create a production build:
+
 ```bash
 npm run build
 ```
@@ -43,6 +45,7 @@ npm run build
 ### Lint
 
 Check code quality:
+
 ```bash
 npm run lint
 ```

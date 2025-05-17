@@ -13,7 +13,7 @@ function Workout({ audioContext }: { audioContext: AudioContext }) {
   const [restTime, setRestTime] = useState(REST_TIME);
 
   const startTimer = useCallback(
-    (duration: number, rest: boolean, betweenSets: boolean = false) => {
+    (duration: number, rest: boolean, betweenSets = false) => {
       setTimeLeft(duration);
       setIsRest(rest);
       setIsRestBetweenSets(betweenSets);

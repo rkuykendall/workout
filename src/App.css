@@ -1,6 +1,7 @@
 :root {
-  --color-sky-50: oklch(0.977 0.013 236.62);
-  --color-sky-300: oklch(0.828 0.111 230.318);
+  --blue: #4f89f9;
+  --pink: #f2d0fa;
+  --white: whitesmoke;
 }
 
 .hidden {
@@ -19,38 +20,33 @@ body {
 }
 
 #workout-container {
-  height: 100vh;
-  background-color: whitesmoke;
-  transition: background-color 3s ease;
+  min-height: 100vh;
+  background-color: var(--pink);
+  color: var(--blue);
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  padding: 1rem;
 }
 
 #workout-container.resting {
-  background-color: lightskyblue;
+  background-color: var(--white);
+  color: var(--blue);
 }
 
 .exercise {
-  text-align: center;
   margin: 20px 0;
   font-size: 4rem;
-  line-height: 6rem;
 }
 
 #timer {
-  font-size: 9rem;
+  font-size: 12rem;
   font-weight: bold;
-  margin-bottom: 2rem;
 }
 
 .button {
-  display: block;
-  margin: 20px auto;
   padding: 10px 20px;
   font-size: 1.5rem;
-  background-color: #007bff;
+  background-color: var(--blue);
   color: #fff;
   border: none;
   border-radius: 5px;

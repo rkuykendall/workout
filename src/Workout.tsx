@@ -14,7 +14,11 @@ function Workout({ audioContext }: { audioContext: AudioContext }) {
   const [restTime, setRestTime] = useState(REST_TIME);
 
   // Wake lock to keep screen on during workout
-  const { isSupported: isWakeLockSupported, requestWakeLock, releaseWakeLock } = useWakeLock();
+  const {
+    isSupported: isWakeLockSupported,
+    requestWakeLock,
+    releaseWakeLock,
+  } = useWakeLock();
 
   const startTimer = useCallback(
     (duration: number, rest: boolean, betweenSets = false) => {

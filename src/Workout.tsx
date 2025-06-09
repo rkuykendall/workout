@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import clsx from 'clsx';
 import { playCountdownBeeps, REST_TIME, workoutRoutine } from './utils';
+import { useWakeLock } from './hooks/useWakeLock';
 
 function Workout({ audioContext }: { audioContext: AudioContext }) {
   const [isStarted, setIsStarted] = useState(true);
@@ -11,6 +12,9 @@ function Workout({ audioContext }: { audioContext: AudioContext }) {
   const [isRest, setIsRest] = useState(false);
   const [isRestBetweenSets, setIsRestBetweenSets] = useState(false);
   const [restTime, setRestTime] = useState(REST_TIME);
+
+  // Wake lock to keep screen on during workout
+  const { isSupported: isWakeLockSupported, requestWakeLock, releaseWakeLock } = useWakeLock();
 
   const startTimer = useCallback(
     (duration: number, rest: boolean, betweenSets = false) => {
@@ -33,6 +37,15 @@ function Workout({ audioContext }: { audioContext: AudioContext }) {
       }
     });
   }, [startTimer]);
+
+  // Request wake lock when workout starts, release when it ends
+  useEffect(() => {
+    if (isStarted && isWakeLockSupported) {
+      void requestWakeLock();
+    } else if (!isStarted) {
+      void releaseWakeLock();
+    }
+  }, [isStarted, isWakeLockSupported, requestWakeLock, releaseWakeLock]);
 
   useEffect(() => {
     if (!isStarted || isPaused || timeLeft < 0) return;

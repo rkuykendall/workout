@@ -9,6 +9,7 @@ A minimal workout timer I built to guide me through my physical therapy exercise
 - Audio cues for exercise transitions
 - Pause/Resume functionality for when I need breaks
 - Multiple sets tracking for exercises that require them
+- Screen wake lock to prevent screen from turning off during workouts
 - Simple, distraction-free interface
 
 ## Getting Started
@@ -57,6 +58,7 @@ npm run lint
 - Vite
 - ESLint with type-aware rules
 - Web Audio API for sound effects
+- Screen Wake Lock API to keep screen on during workouts
 - CSS for styling
 
 ## Notes

@@ -9,22 +9,25 @@ interface Workout {
 }
 
 export const workoutRoutine: Workout[] = [
-  { name: 'Dynamic Cross-Body Stretch (Warm-up)', duration: 30, sets: 1 },
-  {
-    name: 'Alt Shoulder IR/ER with Arms Extended (Warm-up)',
-    duration: 30,
-    sets: 1,
-  },
+  // { name: 'Dynamic Cross-Body Stretch (Warm-up)', duration: 30, sets: 1 },
+  // {
+  //   name: 'Alt Shoulder IR/ER with Arms Extended (Warm-up)',
+  //   duration: 30,
+  //   sets: 1,
+  // },
 
-  { name: 'Doorway Pec Stretch', duration: 30, sets: 3 },
-  { name: 'Rhomboid Stretch', duration: 30, sets: 3 },
+  { name: 'Doorway Pec Stretch', duration: 30, sets: 2 }, // 3
+  { name: 'Rhomboid Stretch', duration: 30, sets: 2 }, // 3
+
+  // { name: 'Thread the Needle', duration: 60, sets: 1 },
+  { name: 'Plank Walkout (5s Hold)', duration: 45, sets: 3 },
+  // { name: 'Cat / Cow', duration: 30, sets: 3 },
+  // { name: 'Y Slide + Lift (Blue/Purple Band)', duration: 60, sets: 3 },
 
   { name: 'Open Book Stretch', duration: 120, sets: 2 },
-  { name: 'Thread the Needle', duration: 60, sets: 1 },
-  { name: 'Plank Walkout (5s Hold)', duration: 45, sets: 3 },
-  { name: 'Cat / Cow', duration: 30, sets: 3 },
-  { name: 'Y Slide + Lift (Blue/Purple Band)', duration: 60, sets: 3 },
-  { name: 'Elbow Side Plank + Snatch', duration: 25, sets: 6 },
+
+  { name: 'Elbow Side Plank + Snatch', duration: 25, sets: 4 }, // sets: 6
+
   { name: 'Serratus Pushup', duration: 30, sets: 1 },
 
   { name: 'Pushup', duration: 15, sets: 2 },

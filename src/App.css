@@ -52,3 +52,32 @@ body {
   border-radius: 5px;
   cursor: pointer;
 }
+
+#workout-container.complete {
+  background-color: var(--blue);
+  color: #fff;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 2rem;
+}
+
+#complete-checkmark {
+  font-size: 6rem;
+  line-height: 1;
+}
+
+#complete-message h1 {
+  font-size: 2.5rem;
+  margin: 0.5rem 0;
+}
+
+#complete-message p {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+#workout-container.complete .button {
+  background-color: #fff;
+  color: var(--blue);
+}

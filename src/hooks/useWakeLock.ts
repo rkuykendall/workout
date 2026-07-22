@@ -2,19 +2,14 @@ import { useState, useEffect, useCallback } from 'react';
 
 export function useWakeLock() {
   const [wakeLock, setWakeLock] = useState<WakeLockSentinel | null>(null);
-  const [isSupported, setIsSupported] = useState(false);
+  const [isSupported] = useState(() => 'wakeLock' in navigator);
   const [isActive, setIsActive] = useState(false);
-
-  useEffect(() => {
-    // Check if the Wake Lock API is supported
-    setIsSupported('wakeLock' in navigator);
-  }, []);
 
   const requestWakeLock = useCallback(async () => {
     if (!isSupported || wakeLock) return;
 
     try {
-      const wakeLockSentinel = await navigator.wakeLock!.request('screen');
+      const wakeLockSentinel = await navigator.wakeLock.request('screen');
       setWakeLock(wakeLockSentinel);
       setIsActive(true);
 
@@ -47,7 +42,7 @@ export function useWakeLock() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && isActive && !wakeLock) {
-        requestWakeLock();
+        void requestWakeLock();
       }
     };
 
@@ -61,7 +56,7 @@ export function useWakeLock() {
   useEffect(() => {
     return () => {
       if (wakeLock) {
-        releaseWakeLock();
+        void releaseWakeLock();
       }
     };
   }, [wakeLock, releaseWakeLock]);

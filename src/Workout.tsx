@@ -6,10 +6,12 @@ import { useWakeLock } from './hooks/useWakeLock';
 function Workout({ audioContext }: { audioContext: AudioContext }) {
   const [isStarted, setIsStarted] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [currentSet, setCurrentSet] = useState(1);
-  const [timeLeft, setTimeLeft] = useState(workoutRoutine[0].duration);
-  const [isRest, setIsRest] = useState(false);
+  // The workout opens with a rest/get-ready countdown before the first exercise.
+  const [timeLeft, setTimeLeft] = useState(REST_TIME);
+  const [isRest, setIsRest] = useState(true);
   const [isRestBetweenSets, setIsRestBetweenSets] = useState(false);
   const [restTime, setRestTime] = useState(REST_TIME);
 
@@ -29,19 +31,6 @@ function Workout({ audioContext }: { audioContext: AudioContext }) {
     []
   );
 
-  const nextExercise = useCallback(() => {
-    setCurrentExerciseIndex((prevIndex) => {
-      if (prevIndex + 1 < workoutRoutine.length) {
-        setCurrentSet(1);
-        startTimer(workoutRoutine[prevIndex + 1].duration, false);
-        return prevIndex + 1;
-      } else {
-        setIsStarted(false);
-        return prevIndex;
-      }
-    });
-  }, [startTimer]);
-
   // Request wake lock when workout starts, release when it ends
   useEffect(() => {
     if (isStarted && isWakeLockSupported) {
@@ -59,20 +48,19 @@ function Workout({ audioContext }: { audioContext: AudioContext }) {
     if (timeLeft === 0) {
       setTimeout(() => {
         if (isRest) {
-          if (isRestBetweenSets) {
-            setIsRestBetweenSets(false);
-            startTimer(workoutRoutine[currentExerciseIndex].duration, false);
-          } else {
-            nextExercise();
-          }
+          // Rest is over; begin the exercise it was leading into.
+          startTimer(workoutRoutine[currentExerciseIndex].duration, false);
+        } else if (currentSet < workoutRoutine[currentExerciseIndex].sets) {
+          setCurrentSet((prevSet) => prevSet + 1);
+          setRestTime((prevRest) => prevRest + 1);
+          startTimer(restTime, true, true);
+        } else if (currentExerciseIndex + 1 < workoutRoutine.length) {
+          setCurrentExerciseIndex((prevIndex) => prevIndex + 1);
+          setCurrentSet(1);
+          startTimer(restTime, true, false);
         } else {
-          if (currentSet < workoutRoutine[currentExerciseIndex].sets) {
-            setCurrentSet((prevSet) => prevSet + 1);
-            setRestTime((prevRest) => prevRest + 1);
-            startTimer(restTime, true, true);
-          } else {
-            startTimer(restTime, true);
-          }
+          setIsStarted(false);
+          setIsComplete(true);
         }
       }, 100);
     }
@@ -87,12 +75,10 @@ function Workout({ audioContext }: { audioContext: AudioContext }) {
     isStarted,
     isPaused,
     isRest,
-    isRestBetweenSets,
     currentSet,
     currentExerciseIndex,
     restTime,
     audioContext,
-    nextExercise,
     startTimer,
   ]);
 
@@ -100,12 +86,33 @@ function Workout({ audioContext }: { audioContext: AudioContext }) {
     setIsPaused((prev) => !prev);
   };
 
-  const showUpNext: boolean =
-    isRest &&
-    !isRestBetweenSets &&
-    currentExerciseIndex + 1 < workoutRoutine.length;
+  const resetWorkout = () => {
+    setCurrentExerciseIndex(0);
+    setCurrentSet(1);
+    setRestTime(REST_TIME);
+    setIsPaused(false);
+    setIsComplete(false);
+    startTimer(REST_TIME, true, false);
+    setIsStarted(true);
+  };
+
+  if (isComplete) {
+    return (
+      <div id="workout-container" className="complete">
+        <div id="complete-message">
+          <div id="complete-checkmark">✓</div>
+          <h1>Workout Complete!</h1>
+          <p>Nice work — you finished every exercise.</p>
+        </div>
+        <button onClick={resetWorkout} className="button">
+          Start Again
+        </button>
+      </div>
+    );
+  }
+
+  const showUpNext: boolean = isRest && !isRestBetweenSets;
   const currentExercise = workoutRoutine[currentExerciseIndex];
-  const nextExerciseName = workoutRoutine[currentExerciseIndex + 1]?.name;
   const hasMultipleSets: boolean = currentExercise.sets > 1;
 
   return (
@@ -116,7 +123,9 @@ function Workout({ audioContext }: { audioContext: AudioContext }) {
       <div id="current-exercise" className="exercise">
         <div id="timer">{timeLeft}</div>
         <div id="exercise-name">
-          {showUpNext ? `Up Next: ${nextExerciseName}` : currentExercise.name}
+          {showUpNext
+            ? `Up Next: ${currentExercise.name}`
+            : currentExercise.name}
         </div>
         {hasMultipleSets && (
           <div id="set-count" className="visible">
